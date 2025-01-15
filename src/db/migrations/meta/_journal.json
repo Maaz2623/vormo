@@ -22,6 +22,13 @@
       "when": 1736942426275,
       "tag": "0002_cultured_hedge_knight",
       "breakpoints": true
+    },
+    {
+      "idx": 3,
+      "version": "7",
+      "when": 1736966957174,
+      "tag": "0003_silly_moon_knight",
+      "breakpoints": true
     }
   ]
 }

@@ -54,7 +54,10 @@ export async function AppSidebar() {
 
   return (
     <Sidebar collapsible="icon" variant="inset">
-      <OrganizationSwitcher />
+      <OrganizationSwitcher
+        name={`${currentUser.firstName}`}
+        userId={currentUser.id}
+      />
       <SidebarContent>
         <SidebarGroup className="">
           <SidebarGroupLabel>Application</SidebarGroupLabel>
