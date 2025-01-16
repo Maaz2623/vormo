@@ -31,15 +31,20 @@ import {
 } from "@/components/ui/dialog";
 import { Input } from "../ui/input";
 import { Button } from "../ui/button";
-import { checkSlug, createOrganization } from "@/db/actions";
+import { checkSlug } from "@/db/actions";
+import Link from "next/link";
+import { useGetOrganizations } from "@/features/organizations/api/use-get-organizations";
+import { useCreateOrganization } from "@/features/organizations/api/use-create-organization";
 
 const OrganizationSwitcher = ({
   name,
-  userId,
+  email,
 }: {
   name: string;
   userId: string;
+  email: string;
 }) => {
+  const { mutate } = useCreateOrganization();
   const [isOpen, setIsOpen] = useState(false);
   const [organizationName, setOrganizationName] = useState("");
   const [slug, setSlug] = useState("");
@@ -59,9 +64,8 @@ const OrganizationSwitcher = ({
     setIsLoading(true);
 
     try {
-      await createOrganization({
+      mutate({
         organizationName: organizationName.trim(),
-        userId,
         organizationSlug: slug.trim(),
       });
       setIsOpen(false);
@@ -135,6 +139,8 @@ const OrganizationSwitcher = ({
     return null;
   };
 
+  const { data: organizations } = useGetOrganizations(email);
+
   return (
     <>
       <SidebarHeader>
@@ -148,12 +154,16 @@ const OrganizationSwitcher = ({
                 </SidebarMenuButton>
               </DropdownMenuTrigger>
               <DropdownMenuContent className="w-[--radix-popper-anchor-width]">
-                <DropdownMenuItem>
-                  <span>Acme Inc</span>
-                </DropdownMenuItem>
-                <DropdownMenuItem>
-                  <span>Acme Corp.</span>
-                </DropdownMenuItem>
+                {organizations?.map((organization) => (
+                  <Link
+                    key={organization.slug}
+                    href={`/organization/${organization.slug}`}
+                  >
+                    <DropdownMenuItem>
+                      <span>{organization.name}</span>
+                    </DropdownMenuItem>
+                  </Link>
+                ))}
                 <DropdownMenuSeparator />
                 <DropdownMenuItem onClick={() => setIsOpen(true)}>
                   <PlusCircleIcon className="size-6" />

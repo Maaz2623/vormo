@@ -26,3 +26,5 @@ export const organizations = pgTable("organization", {
     .notNull()
     .references(() => users.id),
 });
+
+export type Organization = typeof organizations.$inferSelect;

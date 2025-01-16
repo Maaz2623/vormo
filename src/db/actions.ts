@@ -1,4 +1,5 @@
 "use server";
+import redis from "@/lib/upstash/redis";
 import { db } from "./drizzle";
 import { organizations } from "./schema";
 import { checkOrganizationSlugValidity } from "@/lib/upstash/cache";
@@ -19,6 +20,9 @@ export const createOrganization = async ({
       ownerId: userId,
       slug: organizationSlug,
     });
+
+    const cacheKey = `organizations:${"mohammedmaaz2623@gmail.com"}`;
+    await redis.del(cacheKey);
   } catch (error) {
     console.log(error);
   }

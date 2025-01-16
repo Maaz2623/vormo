@@ -13,8 +13,10 @@ import {
 } from "@/components/ui/sidebar";
 import UserButton from "./user-button";
 import { auth } from "@/auth";
-import { getUserData } from "@/lib/upstash/cache";
+import { getOrganizationsByEmail, getUserData } from "@/lib/upstash/cache";
 import OrganizationSwitcher from "./organization-switcher";
+import { Organization } from "@/db/schema";
+import { useGetOrganizations } from "@/features/organizations/api/use-get-organizations";
 
 // Menu items.
 const items = [
@@ -57,6 +59,7 @@ export async function AppSidebar() {
       <OrganizationSwitcher
         name={`${currentUser.firstName}`}
         userId={currentUser.id}
+        email={currentUser.email}
       />
       <SidebarContent>
         <SidebarGroup className="">
