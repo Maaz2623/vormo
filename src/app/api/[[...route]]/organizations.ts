@@ -93,6 +93,43 @@ const app = new Hono()
 
       return c.json(data.slug);
     }
+  )
+  .get(
+    "/:slug",
+    zValidator(
+      "param",
+      z.object({
+        slug: z.string(),
+      })
+    ),
+    async (c) => {
+      const { slug } = c.req.valid("param");
+
+      const session = await auth();
+
+      if (!session || !session.user || !session.user.email) {
+        return c.json(
+          {
+            error: "Unauthorized",
+          },
+          401
+        );
+      }
+
+      const data = await db.query.organizations.findFirst({
+        where: (organizations) => eq(organizations.slug, slug),
+      });
+
+      if (!data)
+        return c.json(
+          {
+            error: "Not found",
+          },
+          404
+        );
+
+      return c.json({ data });
+    }
   );
 
 export default app;

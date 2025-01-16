@@ -1,26 +1,8 @@
 "use client";
 
 import React, { useState, useRef } from "react";
-import {
-  SidebarHeader,
-  SidebarMenu,
-  SidebarMenuButton,
-  SidebarMenuItem,
-} from "../ui/sidebar";
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuSeparator,
-  DropdownMenuTrigger,
-} from "../ui/dropdown-menu";
-import {
-  CheckIcon,
-  ChevronDown,
-  Loader2Icon,
-  PlusCircleIcon,
-  XIcon,
-} from "lucide-react";
+import { SidebarHeader, SidebarMenu, SidebarMenuItem } from "../ui/sidebar";
+import { CheckIcon, ChevronDownIcon, Loader2Icon, XIcon } from "lucide-react";
 import {
   Dialog,
   DialogContent,
@@ -32,9 +14,17 @@ import {
 import { Input } from "../ui/input";
 import { Button } from "../ui/button";
 import { checkSlug } from "@/db/actions";
-import Link from "next/link";
-import { useGetOrganizations } from "@/features/organizations/api/use-get-organizations";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
+
 import { useCreateOrganization } from "@/features/organizations/api/use-create-organization";
+import { useParams } from "next/navigation";
+import { useGetOrganizationBySlug } from "@/features/organizations/api/use-get-organization-by-slug";
+import OrganizationSearchDialog from "./organization-search-dialog";
 
 const OrganizationSwitcher = ({
   name,
@@ -45,7 +35,7 @@ const OrganizationSwitcher = ({
   email: string;
 }) => {
   const { mutate } = useCreateOrganization();
-  const [isOpen, setIsOpen] = useState(false);
+  const [isCreateDialogOpen, setIsCreateDialogOpen] = useState(false);
   const [organizationName, setOrganizationName] = useState("");
   const [slug, setSlug] = useState("");
   const [isSlugValid, setIsSlugValid] = useState<
@@ -53,6 +43,8 @@ const OrganizationSwitcher = ({
   >(null); // true, false, or null for "not checked"
   const [isChecking, setIsChecking] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
+
+  const [searchDialog, setSearchDialog] = useState(false);
 
   const debounceTimeout = useRef<NodeJS.Timeout | null>(null);
 
@@ -68,7 +60,7 @@ const OrganizationSwitcher = ({
         organizationName: organizationName.trim(),
         organizationSlug: slug.trim(),
       });
-      setIsOpen(false);
+      setIsCreateDialogOpen(false);
       setOrganizationName("");
       setSlug("");
     } catch (error) {
@@ -139,42 +131,46 @@ const OrganizationSwitcher = ({
     return null;
   };
 
-  const { data: organizations } = useGetOrganizations(email);
+  const params = useParams();
+
+  const { data: currentOrganization } = useGetOrganizationBySlug(
+    params.organizationSlug as string
+  );
 
   return (
     <>
+      <OrganizationSearchDialog
+        searchDialog={searchDialog}
+        setSearchDialog={setSearchDialog}
+        email={email}
+      />
       <SidebarHeader>
         <SidebarMenu>
-          <SidebarMenuItem>
-            <DropdownMenu>
-              <DropdownMenuTrigger asChild>
-                <SidebarMenuButton>
-                  Select Workspace
-                  <ChevronDown className="ml-auto" />
-                </SidebarMenuButton>
-              </DropdownMenuTrigger>
-              <DropdownMenuContent className="w-[--radix-popper-anchor-width]">
-                {organizations?.map((organization) => (
-                  <Link
-                    key={organization.slug}
-                    href={`/organization/${organization.slug}`}
+          <SidebarMenuItem className="">
+            <TooltipProvider>
+              <Tooltip>
+                <TooltipTrigger className="w-full">
+                  <Button
+                    onClick={() => setSearchDialog(true)}
+                    className="w-full flex justify-between items-center"
+                    variant={`secondary`}
                   >
-                    <DropdownMenuItem>
-                      <span>{organization.name}</span>
-                    </DropdownMenuItem>
-                  </Link>
-                ))}
-                <DropdownMenuSeparator />
-                <DropdownMenuItem onClick={() => setIsOpen(true)}>
-                  <PlusCircleIcon className="size-6" />
-                  <p className="font-medium">Create Organization</p>
-                </DropdownMenuItem>
-              </DropdownMenuContent>
-            </DropdownMenu>
+                    <div className="h-full bg-neutral-500 rounded-full aspect-square" />
+                    <p className="w-full truncate transition-all duration-500 transform">
+                      {currentOrganization?.name}
+                    </p>
+                    <ChevronDownIcon />
+                  </Button>
+                </TooltipTrigger>
+                <TooltipContent className="bg-neutral-200 text-black text-sm ">
+                  <p>{currentOrganization?.name}</p>
+                </TooltipContent>
+              </Tooltip>
+            </TooltipProvider>
           </SidebarMenuItem>
         </SidebarMenu>
       </SidebarHeader>
-      <Dialog open={isOpen} onOpenChange={setIsOpen}>
+      <Dialog open={isCreateDialogOpen} onOpenChange={setIsCreateDialogOpen}>
         <DialogContent>
           <DialogHeader className="mb-2">
             <DialogTitle className="text-2xl -mb-2">
