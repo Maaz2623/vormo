@@ -10,7 +10,7 @@ const SigninPage = () => {
         variant={`outline`}
         onClick={() =>
           signIn("google", {
-            redirectTo: "/dashboard",
+            redirectTo: "/organization",
           })
         }
       >

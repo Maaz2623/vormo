@@ -20,6 +20,7 @@ export const organizations = pgTable("organization", {
   name: varchar("name", {
     length: 255,
   }).notNull(),
+  slug: text("slug").notNull().unique(),
   email: text("email").notNull(),
   ownerId: uuid("owner_id")
     .notNull()
