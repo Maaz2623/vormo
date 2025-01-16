@@ -1,7 +1,7 @@
 "use server";
-import { eq } from "drizzle-orm";
 import { db } from "./drizzle";
 import { organizations } from "./schema";
+import { checkOrganizationSlugValidity } from "@/lib/upstash/cache";
 
 export const createOrganization = async ({
   organizationName,
@@ -24,24 +24,12 @@ export const createOrganization = async ({
   }
 };
 
-export const checkOrganizationSlugValidity = async (slug: string) => {
+export const checkSlug = async (slug: string) => {
   try {
     // Ensure slug is valid format
-    const isValidFormat =
-      /^[a-zA-Z0-9]+(-[a-zA-Z0-9]+)*$/.test(slug) && !/[\/]/.test(slug);
+    const check = checkOrganizationSlugValidity(slug);
 
-    if (!isValidFormat) {
-      return "invalid-format";
-    }
-
-    // Query the database
-    const result = await db
-      .select()
-      .from(organizations)
-      .where(eq(organizations.slug, slug))
-      .limit(1);
-
-    return result.length === 0;
+    return check;
   } catch (error) {
     console.log(error);
     return false; // Assume slug is invalid if an error occurs

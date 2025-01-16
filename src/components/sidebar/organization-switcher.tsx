@@ -31,10 +31,7 @@ import {
 } from "@/components/ui/dialog";
 import { Input } from "../ui/input";
 import { Button } from "../ui/button";
-import {
-  checkOrganizationSlugValidity,
-  createOrganization,
-} from "@/db/actions";
+import { checkSlug, createOrganization } from "@/db/actions";
 
 const OrganizationSwitcher = ({
   name,
@@ -100,7 +97,7 @@ const OrganizationSwitcher = ({
       setIsChecking(true);
 
       try {
-        const result = await checkOrganizationSlugValidity(value);
+        const result = await checkSlug(value);
         setIsSlugValid(result);
       } catch (error) {
         console.error("Error checking slug validity:", error);
