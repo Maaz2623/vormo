@@ -11,10 +11,10 @@ export default async function DashboardLayout({
   children: React.ReactNode;
 }) {
   return (
-    <SidebarProvider>
+    <SidebarProvider className="bg-black">
       <AppSidebar />
       <SidebarInset>
-      <SidebarTrigger />
+        <SidebarTrigger />
         <main>{children}</main>
       </SidebarInset>
     </SidebarProvider>

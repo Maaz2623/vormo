@@ -1,8 +1,19 @@
 "use client";
 
 import React, { useState, useRef } from "react";
-import { SidebarHeader, SidebarMenu, SidebarMenuItem } from "../ui/sidebar";
-import { CheckIcon, ChevronDownIcon, Loader2Icon, XIcon } from "lucide-react";
+import {
+  SidebarHeader,
+  SidebarMenu,
+  SidebarMenuItem,
+  useSidebar,
+} from "../ui/sidebar";
+import {
+  CheckIcon,
+  ChevronDownIcon,
+  Loader2Icon,
+  PlusIcon,
+  XIcon,
+} from "lucide-react";
 import {
   Dialog,
   DialogContent,
@@ -25,6 +36,7 @@ import { useCreateOrganization } from "@/features/organizations/api/use-create-o
 import { useParams } from "next/navigation";
 import { useGetOrganizationBySlug } from "@/features/organizations/api/use-get-organization-by-slug";
 import OrganizationSearchDialog from "./organization-search-dialog";
+import { cn } from "@/lib/utils";
 
 const OrganizationSwitcher = ({
   name,
@@ -34,6 +46,7 @@ const OrganizationSwitcher = ({
   userId: string;
   email: string;
 }) => {
+  const { state } = useSidebar();
   const { mutate } = useCreateOrganization();
   const [isCreateDialogOpen, setIsCreateDialogOpen] = useState(false);
   const [organizationName, setOrganizationName] = useState("");
@@ -144,26 +157,61 @@ const OrganizationSwitcher = ({
         setSearchDialog={setSearchDialog}
         email={email}
       />
-      <SidebarHeader>
-        <SidebarMenu>
+      <SidebarHeader className="rounded-lg bg-white">
+        <SidebarMenu className="flex flex-col gap-y-2">
           <SidebarMenuItem className="">
             <TooltipProvider>
               <Tooltip>
                 <TooltipTrigger className="w-full">
                   <Button
                     onClick={() => setSearchDialog(true)}
-                    className="w-full flex justify-between items-center"
+                    className={cn(
+                      "w-full flex justify-between items-center",
+                      state === "collapsed" &&
+                        "flex justify-center items-center"
+                    )}
                     variant={`secondary`}
                   >
                     <div className="h-full bg-neutral-500 rounded-full aspect-square" />
-                    <p className="w-full truncate transition-all duration-500 transform">
-                      {currentOrganization?.name}
-                    </p>
-                    <ChevronDownIcon />
+                    {state === "expanded" && (
+                      <>
+                        <p className="w-full truncate transition-all duration-500 transform">
+                          {currentOrganization?.name}
+                        </p>
+                        <ChevronDownIcon />
+                      </>
+                    )}
                   </Button>
                 </TooltipTrigger>
                 <TooltipContent className="bg-neutral-200 text-black text-sm ">
                   <p>{currentOrganization?.name}</p>
+                </TooltipContent>
+              </Tooltip>
+            </TooltipProvider>
+          </SidebarMenuItem>
+          <SidebarMenuItem className="">
+            <TooltipProvider>
+              <Tooltip>
+                <TooltipTrigger className="w-full">
+                  <Button
+                    onClick={() => setIsCreateDialogOpen(true)}
+                    className={cn(
+                      "w-full flex justify-start items-center",
+                      state === "collapsed" &&
+                        "flex justify-center items-center"
+                    )}
+                    variant={`outline`}
+                  >
+                    <PlusIcon />
+                    {state === "expanded" && (
+                      <p className="transition-all duration-500 transform w-full truncate">
+                        Create organization
+                      </p>
+                    )}
+                  </Button>
+                </TooltipTrigger>
+                <TooltipContent className="bg-neutral-200 text-black text-sm ">
+                  <p>Create a new organization</p>
                 </TooltipContent>
               </Tooltip>
             </TooltipProvider>

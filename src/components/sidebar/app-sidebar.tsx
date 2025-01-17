@@ -13,10 +13,8 @@ import {
 } from "@/components/ui/sidebar";
 import UserButton from "./user-button";
 import { auth } from "@/auth";
-import { getOrganizationsByEmail, getUserData } from "@/lib/upstash/cache";
 import OrganizationSwitcher from "./organization-switcher";
-import { Organization } from "@/db/schema";
-import { useGetOrganizations } from "@/features/organizations/api/use-get-organizations";
+import { getUserData } from "@/lib/upstash/cache";
 
 // Menu items.
 const items = [
@@ -55,14 +53,14 @@ export async function AppSidebar() {
   const currentUser = await getUserData(session.user.email);
 
   return (
-    <Sidebar collapsible="icon" variant="inset">
+    <Sidebar collapsible="icon" variant="inset" className="">
       <OrganizationSwitcher
         name={`${currentUser.firstName}`}
         userId={currentUser.id}
         email={currentUser.email}
       />
-      <SidebarContent>
-        <SidebarGroup className="">
+      <SidebarContent className="rounded-lg">
+        <SidebarGroup className="rounded-lg bg-white">
           <SidebarGroupLabel>Application</SidebarGroupLabel>
           <SidebarGroupContent>
             <SidebarMenu>

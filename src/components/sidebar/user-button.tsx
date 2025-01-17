@@ -34,7 +34,7 @@ const UserButton = ({
   return (
     <>
       {type === "sidebar" && (
-        <SidebarFooter>
+        <SidebarFooter className="bg-white rounded-lg">
           <SidebarMenu>
             <SidebarMenuItem>
               <DropdownMenu>
