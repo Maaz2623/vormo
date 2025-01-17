@@ -1,13 +1,11 @@
 import { useQuery } from "@tanstack/react-query";
 import { client } from "@/lib/hono";
 
-export const useGetOrganizations = (email: string) => {
+export const useGetOrganizations = () => {
   const query = useQuery({
-    queryKey: ["organizations", email], // Unique cache key for this query
+    queryKey: ["organizations"], // Unique cache key for this query
     queryFn: async () => {
-      const response = await client.api.organizations.$get({
-        email: email,
-      });
+      const response = await client.api.organizations.$get();
       if (!response.ok) {
         throw new Error("Failed to fetch organizations");
       }

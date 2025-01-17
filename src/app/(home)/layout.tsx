@@ -1,13 +1,14 @@
 import { auth } from "@/auth";
 import { redirect } from "next/navigation";
-import React from "react";
-import { signIn } from "@/auth";
 
-const HomePage = async () => {
+export default async function HomeLayout({
+  children,
+}: {
+  children: React.ReactNode;
+}) {
   const session = await auth();
 
   if (!session) redirect("/auth/sign-in");
-  return <div>HomePage</div>;
-};
 
-export default HomePage;
+  return <main>{children}</main>;
+}

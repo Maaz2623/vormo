@@ -31,7 +31,7 @@ const OrganizationSearchDialog = ({
 }) => {
   const { data: organizations } = useGetOrganizations(email);
 
-  const params = useParams()
+  const params = useParams();
 
   return (
     <Dialog open={searchDialog} onOpenChange={setSearchDialog}>
@@ -41,7 +41,10 @@ const OrganizationSearchDialog = ({
           <DialogDescription></DialogDescription>
         </DialogHeader>
         <Command className="border font-medium h-[400px] w-[600px]">
-          <CommandInput placeholder="Type a command or search..." className="h-12" />
+          <CommandInput
+            placeholder="Type a command or search..."
+            className="h-12"
+          />
           <CommandList>
             <CommandEmpty>No results found.</CommandEmpty>
             <CommandGroup
@@ -51,7 +54,7 @@ const OrganizationSearchDialog = ({
               {organizations?.map((organization) => (
                 <Link
                   key={organization.slug}
-                  href={organization.slug}
+                  href={`/organization/${organization.slug}/overview`}
                   onClick={() => setSearchDialog(false)}
                 >
                   <CommandItem
@@ -61,9 +64,9 @@ const OrganizationSearchDialog = ({
                   >
                     <div className="flex justify-between">
                       <p>{organization.name}</p>
-                    {params.organizationSlug === organization.slug && (
+                      {params.organizationSlug === organization.slug && (
                         <CheckIcon />
-                    )}
+                      )}
                     </div>
                   </CommandItem>
                 </Link>
