@@ -39,10 +39,16 @@ const UserButton = ({
             <SidebarMenuItem>
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
-                  <SidebarMenuButton className="h-12 ">
+                  <SidebarMenuButton className={cn("h-12 ",
+                    state === "collapsed" && "flex justify-center items-center"
+                  )}>
                     {state !== "collapsed" && (
                       <>
-                        <div className="flex w-full justify-start items-center gap-x-1.5">
+                        <div
+                          className={cn(
+                            "flex w-full justify-start items-center gap-x-1.5"
+                          )}
+                        >
                           <Image
                             className="rounded-full size-8 shrink-0"
                             src={image}
@@ -67,7 +73,7 @@ const UserButton = ({
                       </>
                     )}
                     {state === "collapsed" && (
-                      <div className="bg-neutral-500 relative size-6 flex-shrink-0 overflow-hidden transition-all duration-300 rounded-full">
+                      <div className="bg-neutral-500 relative size-6 flex justify-center items-center flex-shrink-0 overflow-hidden transition-all duration-300 rounded-full">
                         <Image src={image} alt="image" fill />
                       </div>
                     )}

@@ -11,7 +11,7 @@ export default async function DashboardLayout({
   children: React.ReactNode;
 }) {
   return (
-    <SidebarProvider className="bg-black">
+    <SidebarProvider className="">
       <AppSidebar />
       <SidebarInset>
         <SidebarTrigger />
