@@ -1,5 +1,6 @@
 "use client";
 import React, { useState } from "react";
+import { motion } from "motion/react";
 import {
   AlertDialog,
   AlertDialogContent,
@@ -98,30 +99,36 @@ const CreateEventModal = () => {
 
           <div className="w-full h-8 my-4 justify-center items-center flex flex-col">
             <div className="flex justify-center items-center relative w-2/3">
-              <div
+              <motion.div
+                initial={{ opacity: 0, scale: 0 }}
+                animate={{ opacity: 1, scale: 1 }}
                 className={cn(
                   "border font-semibold text-sm absolute transition-all duration-300 bg-white -left-2 rounded-lg z-20 px-2 py-1",
-                  completed >= 0 && "bg-green-600 text-white"
+                  completed >= 0 && "bg-green-600 text-white rotate-180"
                 )}
               >
                 1
-              </div>
-              <div
+              </motion.div>
+              <motion.div
+                initial={{ opacity: 0, scale: 0 }}
+                animate={{ opacity: 1, scale: 1 }}
                 className={cn(
                   "border font-semibold text-sm absolute transition-all duration-300 bg-white -left-50 rounded-lg px-2 z-20 py-1",
                   completed >= 50 && "bg-green-600 text-white"
                 )}
               >
                 2
-              </div>
-              <div
+              </motion.div>
+              <motion.div
+                initial={{ opacity: 0, scale: 0 }}
+                animate={{ opacity: 1, scale: 1 }}
                 className={cn(
                   "border font-semibold transition-all duration-300 text-sm absolute bg-white -right-2 rounded-lg px-2 py-1 z-20",
                   completed === 100 && "bg-green-600 text-white"
                 )}
               >
                 3
-              </div>
+              </motion.div>
               <Progress value={completed} className="w-full z-10" />
             </div>
           </div>
@@ -132,7 +139,15 @@ const CreateEventModal = () => {
                 onSubmit={form.handleSubmit(onSubmit)}
                 className="space-y-8 border"
               >
-                <div className="flex gap-x-4 w-full border items-center justify-between">
+                <motion.div
+                  className="flex gap-x-4 w-full border items-center justify-between"
+                  initial={{
+                    y: 200,
+                  }}
+                  animate={{
+                    y: 0,
+                  }}
+                >
                   <FormField
                     control={form.control}
                     name="name"
@@ -163,7 +178,7 @@ const CreateEventModal = () => {
                       </FormItem>
                     )}
                   />
-                </div>
+                </motion.div>
                 <div></div>
               </form>
             </Form>
@@ -171,41 +186,83 @@ const CreateEventModal = () => {
 
           <div className="w-full flex justify-center items-center -mt-4">
             {completed !== 100 && (
-              <div className="flex  gap-x-3">
+              <div className="flex border gap-x-3">
                 {completed !== 0 && (
-                  <Button
-                    variant={`outline`}
-                    className="text-sm font-semibold w-[100px] transition-all duration-300 transform"
-                    onClick={() => setCompleted(completed - 50)}
+                  <motion.div
+                    initial={{
+                      scale: 0,
+                      y: 50,
+                    }}
+                    animate={{
+                      scale: 1,
+                      y: 0,
+                    }}
                   >
-                    Previous
-                  </Button>
+                    <Button
+                      variant={`outline`}
+                      className="text-sm hover:scale-105 font-semibold w-[100px] transition-all duration-300 transform"
+                      onClick={() => setCompleted(completed - 50)}
+                    >
+                      Previous
+                    </Button>
+                  </motion.div>
                 )}
-                <Button
-                  className="text-sm font-semibold w-[100px]"
-                  onClick={() => setCompleted(completed + 50)}
+                <motion.div
+                  initial={{
+                    scale: 0,
+                    y: 50,
+                  }}
+                  animate={{
+                    scale: 1,
+                    y: 0,
+                  }}
                 >
-                  Next
-                </Button>
+                  <Button
+                    className="text-sm hover:scale-105 font-semibold w-[100px] transition-all duration-300  transform"
+                    onClick={() => setCompleted(completed + 50)}
+                  >
+                    Next
+                  </Button>
+                </motion.div>
               </div>
             )}
             {completed === 100 && (
               <div className="flex border gap-x-3">
-                <Button
-                  variant={`outline`}
-                  className="text-sm font-semibold w-[100px]"
-                  onClick={() => setCompleted(completed - 50)}
+                <motion.div
+                  initial={{
+                    scale: 0,
+                    y: 50,
+                  }}
+                  animate={{
+                    scale: 1,
+                    y: 0,
+                  }}
                 >
-                  Previous
-                </Button>
-                <Button className="text-sm font-semibold w-[100px]">
-                  Finish
-                </Button>
+                  <Button
+                    variant={`outline`}
+                    className="text-sm hover:scale-105 font-semibold w-[100px]"
+                    onClick={() => setCompleted(completed - 50)}
+                  >
+                    Previous
+                  </Button>
+                </motion.div>
+                <motion.div
+                  initial={{
+                    scale: 0,
+                    y: 50,
+                  }}
+                  animate={{
+                    scale: 1,
+                    y: 0,
+                  }}
+                >
+                  <Button className="text-sm hover:scale-105 font-semibold w-[100px]">
+                    Finish
+                  </Button>
+                </motion.div>
               </div>
             )}
           </div>
-
-
         </AlertDialogContent>
       </AlertDialog>
 
