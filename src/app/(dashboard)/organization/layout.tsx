@@ -8,5 +8,5 @@ export default async function OrganizationLayout({
 
   console.log(response);
 
-  return <main>{children}</main>;
+  return <main className=" h-full ">{children}</main>;
 }

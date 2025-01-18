@@ -15,9 +15,7 @@ export default async function DashboardLayout({
   return (
     <SidebarProvider className="">
       <AppSidebar />
-      <SidebarInset>
-        <main>{children}</main>
-      </SidebarInset>
+      <SidebarInset className="bg-neutral-200">{children}</SidebarInset>
     </SidebarProvider>
   );
 }

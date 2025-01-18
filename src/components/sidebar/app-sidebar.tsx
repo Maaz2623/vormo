@@ -27,7 +27,7 @@ export async function AppSidebar() {
         userId={currentUser.id}
         email={currentUser.email}
       />
-      <SidebarContent className="rounded-lg">
+      <SidebarContent className="rounded-lg mt-1">
         <SidebarGroup className="rounded-lg bg-white">
           <SidebarGroupLabel>Application</SidebarGroupLabel>
           <SidebarGroupContent>

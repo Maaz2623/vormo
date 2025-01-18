@@ -56,6 +56,9 @@ type Block = {
 
 export const events = pgTable("events", {
   id: uuid("id").notNull().primaryKey().defaultRandom().unique(),
+  name: varchar({
+    length: 50,
+  }).notNull(),
   organizationId: uuid("organization_id")
     .notNull()
     .references(() => organizations.id),
@@ -63,6 +66,7 @@ export const events = pgTable("events", {
   venueLocation: text("venue_location").notNull(),
   venueTag: text("venue_tag").notNull(),
   blocks: jsonb("blocks").$type<Block[]>().default([]),
+  dateTime: timestamp("date_time").notNull(),
 });
 
 export type Organization = typeof organizations.$inferSelect;
