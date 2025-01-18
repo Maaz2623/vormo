@@ -1,4 +1,11 @@
-import { pgTable, text, timestamp, uuid, varchar } from "drizzle-orm/pg-core";
+import {
+  pgEnum,
+  pgTable,
+  text,
+  timestamp,
+  uuid,
+  varchar,
+} from "drizzle-orm/pg-core";
 
 export const users = pgTable("users", {
   id: uuid("id").notNull().primaryKey().defaultRandom().unique(),
@@ -25,6 +32,19 @@ export const organizations = pgTable("organization", {
   ownerId: uuid("owner_id")
     .notNull()
     .references(() => users.id),
+});
+
+export const ROLE_ENUM = pgEnum("member_roles", ["ADMIN", "MODERATOR", "USER"]);
+
+export const memberships = pgTable("memberships", {
+  id: uuid("id").notNull().primaryKey().defaultRandom().unique(),
+  userId: uuid("user_id")
+    .notNull()
+    .references(() => users.id),
+  organizationId: uuid("organization_id")
+    .notNull()
+    .references(() => organizations.id),
+  memberRole: ROLE_ENUM("member_role").default("USER"),
 });
 
 export type Organization = typeof organizations.$inferSelect;

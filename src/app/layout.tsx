@@ -4,6 +4,8 @@ import "./globals.css";
 import { ThemeProvider } from "@/components/theme-provider";
 import { SessionProvider } from "next-auth/react";
 import { QueryProvider } from "@/components/query-client";
+import { JotaiProvider } from "@/components/jotai-provider";
+import { Modals } from "@/components/modals";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -25,18 +27,19 @@ export default function RootLayout({
 }: Readonly<{
   children: React.ReactNode;
 }>) {
-
-  
-
   return (
     <html lang="en" suppressHydrationWarning>
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}
       >
         <ThemeProvider attribute={`class`} defaultTheme="light">
-          <QueryProvider>
-            <SessionProvider>{children}</SessionProvider>
-          </QueryProvider>
+          <JotaiProvider>
+            <QueryProvider>
+              <SessionProvider>
+                {children} <Modals />
+              </SessionProvider>
+            </QueryProvider>
+          </JotaiProvider>
         </ThemeProvider>
       </body>
     </html>

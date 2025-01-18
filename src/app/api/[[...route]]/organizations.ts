@@ -1,8 +1,7 @@
 import { auth } from "@/auth";
 import { db } from "@/db/drizzle";
-import { organizations, users } from "@/db/schema";
+import { memberships, organizations } from "@/db/schema";
 import { zValidator } from "@hono/zod-validator";
-import redis from "@/lib/upstash/redis";
 import { eq } from "drizzle-orm";
 import { Hono } from "hono";
 import { z } from "zod";
@@ -70,11 +69,11 @@ const app = new Hono()
 
       const email = session.user.email;
 
-      const [user] = await db
-        .select()
-        .from(users)
-        .where(eq(users.email, email))
-        .limit(1);
+      const user = await db.query.users.findFirst({
+        where: (users) => eq(users.email, email),
+      });
+
+      if (!user) return;
 
       const { organizationName, organizationSlug } = c.req.valid("json");
 
@@ -88,8 +87,11 @@ const app = new Hono()
         })
         .returning();
 
-      const cacheKey = `organizations:${"mohammedmaaz2623@gmail.com"}`;
-      await redis.del(cacheKey);
+      await db.insert(memberships).values({
+        userId: user.id,
+        organizationId: data.id,
+        memberRole: "ADMIN",
+      });
 
       return c.json(data.slug);
     }

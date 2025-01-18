@@ -4,10 +4,7 @@ import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { useGetOrganizations } from "@/features/organizations/api/use-get-organizations";
 const HomePage = () => {
-
-
   const { data: organizations } = useGetOrganizations();
-
 
   return (
     <Button asChild>

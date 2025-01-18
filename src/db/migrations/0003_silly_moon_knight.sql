@@ -1,1 +1,0 @@
-ALTER TABLE "organization" DROP CONSTRAINT "organization_email_unique";
