@@ -1,13 +1,16 @@
 import { Hono } from "hono";
 import { handle } from "hono/vercel";
 import organizations from "./organizations";
+import memberships from './memberships'
 
 export const runtime = "edge";
 
 const app = new Hono().basePath("/api");
 
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
-const routes = app.route("/organizations", organizations);
+const routes = app
+  .route("/organizations", organizations)
+  .route("/memberships", memberships);
 
 export const GET = handle(app);
 export const POST = handle(app);

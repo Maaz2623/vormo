@@ -1,4 +1,6 @@
 import {
+  decimal,
+  jsonb,
   pgEnum,
   pgTable,
   text,
@@ -34,7 +36,7 @@ export const organizations = pgTable("organization", {
     .references(() => users.id),
 });
 
-export const ROLE_ENUM = pgEnum("member_roles", ["ADMIN", "MODERATOR", "USER"]);
+export const ROLE_ENUM = pgEnum("roles", ["ADMIN", "MODERATOR", "USER"]);
 
 export const memberships = pgTable("memberships", {
   id: uuid("id").notNull().primaryKey().defaultRandom().unique(),
@@ -47,4 +49,21 @@ export const memberships = pgTable("memberships", {
   memberRole: ROLE_ENUM("member_role").default("USER"),
 });
 
+type Block = {
+  title: string;
+  paragraph: string;
+};
+
+export const events = pgTable("events", {
+  id: uuid("id").notNull().primaryKey().defaultRandom().unique(),
+  organizationId: uuid("organization_id")
+    .notNull()
+    .references(() => organizations.id),
+  price: decimal("price").notNull(),
+  venueLocation: text("venue_location").notNull(),
+  venueTag: text("venue_tag").notNull(),
+  blocks: jsonb("blocks").$type<Block[]>().default([]),
+});
+
 export type Organization = typeof organizations.$inferSelect;
+export type Member = typeof memberships.$inferSelect;
