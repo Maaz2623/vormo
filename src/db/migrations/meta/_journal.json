@@ -15,6 +15,13 @@
       "when": 1737218431992,
       "tag": "0001_tricky_swarm",
       "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "7",
+      "when": 1737360304695,
+      "tag": "0002_sudden_zodiak",
+      "breakpoints": true
     }
   ]
 }

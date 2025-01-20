@@ -49,7 +49,7 @@ export const memberships = pgTable("memberships", {
   memberRole: ROLE_ENUM("member_role").default("USER"),
 });
 
-type Block = {
+export type Block = {
   title: string;
   paragraph: string;
 };
@@ -66,7 +66,7 @@ export const events = pgTable("events", {
   venueLocation: text("venue_location").notNull(),
   venueTag: text("venue_tag").notNull(),
   blocks: jsonb("blocks").$type<Block[]>().default([]),
-  dateTime: timestamp("date_time").notNull(),
+  date: timestamp("date").notNull(),
 });
 
 export type Organization = typeof organizations.$inferSelect;

@@ -42,7 +42,7 @@ const OrganizationSwitcher = ({
         setSearchDialog={setSearchDialog}
         email={email}
       />
-      <SidebarHeader className="rounded-lg bg-white">
+      <SidebarHeader className="rounded-lg bg-white" id="sidebar-header">
         <SidebarMenu className="flex flex-col gap-y-2">
           <SidebarMenuItem className="">
             <Button
