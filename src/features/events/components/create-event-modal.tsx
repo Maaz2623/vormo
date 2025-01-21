@@ -45,8 +45,11 @@ import { DateRange } from "react-day-picker";
 import { addDays } from "date-fns";
 import { Calendar } from "@/components/ui/calendar";
 import usePlacesAutocomplete, {
+  ClearSuggestions,
   getGeocode,
   getLatLng,
+  SetValue,
+  Status,
 } from "use-places-autocomplete";
 
 import { ScrollArea } from "@/components/ui/scroll-area";
@@ -61,25 +64,34 @@ declare global {
   }
 }
 
-const containerStyle = {
-  width: "100%",
-  height: "400px",
-};
+interface CreateEventMapModalProps {
+  mapOpen: boolean;
+  setMapOpen: (mapOpen: boolean) => void;
+  mapSelected: {
+    lat: number;
+    lng: number;
+  } | null;
+  setValue: SetValue;
+  value: string;
+  ready: boolean;
+  status: Status;
+  data: google.maps.places.AutocompletePrediction[];
+  clearSuggestions: ClearSuggestions;
+  setMapSelected: React.Dispatch<
+    React.SetStateAction<{
+      lat: number;
+      lng: number;
+    } | null>
+  >;
+  setPlaceName: React.Dispatch<React.SetStateAction<string | null>>;
+}
 
 const CreateEventModal = () => {
-  const defaultCenter = useMemo(
-    () => ({
-      lat: 43.45,
-      lng: -80.49,
-    }),
-    []
-  );
-
   const [mapSelected, setMapSelected] = useState<{
     lat: number;
     lng: number;
   } | null>(null);
-  const [completed, setCompleted] = useState(0);
+  const [completed, setCompleted] = useState(25);
   const [open, setOpen] = useCreateEventModalStore();
   const [calendarOpen, setCalendarOpen] = useState(false);
   const [mapOpen, setMapOpen] = useState(false);
@@ -102,42 +114,33 @@ const CreateEventModal = () => {
     debounce: 300,
   });
 
-  const mapRef = useRef<google.maps.Map | null>(null);
-
   const [date, setDate] = useState<DateRange | undefined>({
     from: new Date(2022, 0, 20),
     to: addDays(new Date(2022, 0, 20), 20),
   });
-
-  const handleLocationSelect = async (address: string) => {
-    setValue(address, false);
-    clearSuggestions();
-
-    try {
-      const result = await getGeocode({ address });
-      const { lat, lng } = getLatLng(result[0]);
-      setMapSelected({ lat, lng });
-      setPlaceName(result[0].formatted_address);
-      focusOnMarker(lat, lng);
-    } catch (error) {
-      console.error("Error selecting location:", error);
-    }
-  };
-
-  const focusOnMarker = (lat: number, lng: number) => {
-    if (mapRef.current) {
-      mapRef.current.panTo({ lat, lng });
-      mapRef.current.setZoom(14);
-    }
-  };
 
   const [block, setBlock] = useState<Block>({
     title: "",
     paragraph: "",
   });
 
+  console.log(completed);
+
   return (
     <>
+      <CreateEventMapModal
+        mapOpen={mapOpen}
+        setMapOpen={setMapOpen}
+        setMapSelected={setMapSelected}
+        setPlaceName={setPlaceName}
+        mapSelected={mapSelected}
+        setValue={setValue}
+        value={value}
+        ready={ready}
+        status={status}
+        data={data}
+        clearSuggestions={clearSuggestions}
+      />
       <AlertDialog open={editBlockOpen} onOpenChange={setEditBlockOpen}>
         <AlertDialogContent>
           <VisuallyHidden>
@@ -315,66 +318,6 @@ const CreateEventModal = () => {
         </DialogContent>
       </Dialog>
 
-      <Dialog open={mapOpen} onOpenChange={setMapOpen}>
-        <DialogContent className="rounded-lg p-1 w-[600px] max-w-[1000px]">
-          <VisuallyHidden>
-            <DialogHeader>
-              <DialogTitle></DialogTitle>
-              <DialogDescription></DialogDescription>
-            </DialogHeader>
-          </VisuallyHidden>
-          <GoogleMap
-            zoom={16}
-            center={mapSelected || defaultCenter}
-            mapContainerStyle={containerStyle}
-            options={{
-              zoomControl: false,
-              mapTypeControl: false,
-              streetViewControl: false,
-              fullscreenControl: false,
-            }}
-          >
-            {mapSelected && <Marker position={mapSelected} />}
-          </GoogleMap>
-          <div className="absolute left-0 top-8 flex flex-col justify-center items-center w-full">
-            <div className="w-1/2">
-              <Input
-                onChange={(e) => setValue(e.target.value)}
-                value={value}
-                placeholder="Search address"
-                className="bg-white shadow-2xl font-medium border"
-                disabled={!ready} 
-              />
-            </div>
-            {status === "OK" && data.length > 0 && (
-              <motion.div
-                className="w-full flex justify-center"
-                initial={{ y: -100 }}
-                animate={{ y: 0 }}
-                exit={{ y: -100 }}
-              >
-                <ScrollArea className="w-[90%] rounded-lg h-64 border bg-white/90 mt-3 flex flex-col gap-y-3">
-                  {data.map((item) => (
-                    <div
-                      key={item.place_id}
-                      onClick={() => handleLocationSelect(item.description)}
-                      className="flex items-center mb-1 px-4 py-2 space-x-2 cursor-pointer hover:bg-gray-100 rounded-md"
-                    >
-                      <MapPinIcon className="size-5 text-gray-600" />
-                      <div className="flex-1">
-                        <p className="truncate font-medium text-sm text-gray-800 text-wrap">
-                          {item.description}
-                        </p>
-                      </div>
-                    </div>
-                  ))}
-                </ScrollArea>
-              </motion.div>
-            )}
-          </div>
-        </DialogContent>
-      </Dialog>
-
       {/* Other components and content */}
 
       <Dialog open={calendarOpen} onOpenChange={setCalendarOpen}>
@@ -483,7 +426,7 @@ const CreateEventModal = () => {
                 </div>
               </motion.div>
             )}{" "}
-            {completed === 50 && (
+            {completed === 25 && (
               <motion.div
                 className="flex gap-x-4 w-full h-full items-center justify-between"
                 initial={{
@@ -529,7 +472,7 @@ const CreateEventModal = () => {
                 </div>
               </motion.div>
             )}{" "}
-            {completed === 100 && (
+            {completed === 50 && (
               <motion.div
                 className="flex gap-x-4 w-full py-2 border items-center justify-between"
                 initial={{
@@ -596,7 +539,7 @@ const CreateEventModal = () => {
                     <Button
                       variant={`outline`}
                       className="text-sm hover:scale-105 font-semibold w-[100px] transition-all duration-300 transform"
-                      onClick={() => setCompleted(completed - 50)}
+                      onClick={() => setCompleted(completed - 25)}
                     >
                       Previous
                     </Button>
@@ -614,7 +557,7 @@ const CreateEventModal = () => {
                 >
                   <Button
                     className="text-sm hover:scale-105 font-semibold w-[100px] transition-all duration-300  transform"
-                    onClick={() => setCompleted(completed + 50)}
+                    onClick={() => setCompleted(completed + 25)}
                   >
                     Next
                   </Button>
@@ -636,7 +579,7 @@ const CreateEventModal = () => {
                   <Button
                     variant={`outline`}
                     className="text-sm hover:scale-105 font-semibold w-[100px]"
-                    onClick={() => setCompleted(completed - 50)}
+                    onClick={() => setCompleted(completed - 25)}
                   >
                     Previous
                   </Button>
@@ -665,3 +608,116 @@ const CreateEventModal = () => {
 };
 
 export default CreateEventModal;
+
+const CreateEventMapModal = ({
+  mapOpen,
+  setMapOpen,
+  setMapSelected,
+  setPlaceName,
+  mapSelected,
+  setValue,
+  value,
+  ready,
+  status,
+  data,
+  clearSuggestions,
+}: CreateEventMapModalProps) => {
+  const containerStyle = {
+    width: "100%",
+    height: "400px",
+  };
+
+  const defaultCenter = useMemo(
+    () => ({
+      lat: 43.45,
+      lng: -80.49,
+    }),
+    []
+  );
+
+  const mapRef = useRef<google.maps.Map | null>(null);
+
+  const focusOnMarker = (lat: number, lng: number) => {
+    if (mapRef.current) {
+      mapRef.current.panTo({ lat, lng });
+      mapRef.current.setZoom(14);
+    }
+  };
+
+  const handleLocationSelect = async (address: string) => {
+    setValue(address, false);
+    clearSuggestions();
+
+    try {
+      const result = await getGeocode({ address });
+      const { lat, lng } = getLatLng(result[0]);
+      setMapSelected({ lat, lng });
+      setPlaceName(result[0].formatted_address);
+      focusOnMarker(lat, lng);
+    } catch (error) {
+      console.error("Error selecting location:", error);
+    }
+  };
+
+  return (
+    <Dialog open={mapOpen} onOpenChange={setMapOpen}>
+      <DialogContent className="rounded-lg p-1 w-[600px] max-w-[1000px]">
+        <VisuallyHidden>
+          <DialogHeader>
+            <DialogTitle></DialogTitle>
+            <DialogDescription></DialogDescription>
+          </DialogHeader>
+        </VisuallyHidden>
+        <GoogleMap
+          zoom={16}
+          center={mapSelected || defaultCenter}
+          mapContainerStyle={containerStyle}
+          options={{
+            zoomControl: false,
+            mapTypeControl: false,
+            streetViewControl: false,
+            fullscreenControl: false,
+          }}
+        >
+          {mapSelected && <Marker position={mapSelected} />}
+        </GoogleMap>
+        <div className="absolute left-0 top-8 flex flex-col justify-center items-center w-full">
+          <div className="w-1/2">
+            <Input
+              onChange={(e) => setValue(e.target.value)}
+              value={value}
+              placeholder="Search address"
+              className="bg-white shadow-2xl font-medium border"
+              disabled={!ready}
+            />
+          </div>
+          {status === "OK" && data.length > 0 && (
+            <motion.div
+              className="w-full flex justify-center"
+              initial={{ y: -100 }}
+              animate={{ y: 0 }}
+              exit={{ y: -100 }}
+            >
+              <ScrollArea className="w-[90%] rounded-lg h-64 border bg-white/90 mt-3 flex flex-col gap-y-3">
+                {data.map((item) => (
+                  <div
+                    key={item.place_id}
+                    onClick={() => handleLocationSelect(item.description)}
+                    className="flex items-center mb-1 px-4 py-2 space-x-2 cursor-pointer hover:bg-gray-100 rounded-md"
+                  >
+                    <MapPinIcon className="size-5 text-gray-600" />
+                    <div className="flex-1">
+                      <p className="truncate font-medium text-sm text-gray-800 text-wrap">
+                        {item.description}
+                      </p>
+                    </div>
+                  </div>
+                ))}
+              </ScrollArea>
+            </motion.div>
+          )}
+        </div>
+      </DialogContent>
+    </Dialog>
+  );
+};
