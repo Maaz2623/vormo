@@ -6,7 +6,10 @@ import { SessionProvider } from "next-auth/react";
 import { QueryProvider } from "@/components/query-client";
 import { JotaiProvider } from "@/components/jotai-provider";
 import { Modals } from "@/components/modals";
+import { NextSSRPlugin } from "@uploadthing/react/next-ssr-plugin";
 import Script from "next/script";
+import { extractRouterConfig } from "uploadthing/server";
+import { ourFileRouter } from "./api/uploadthing/core";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -43,6 +46,15 @@ export default function RootLayout({
           <JotaiProvider>
             <QueryProvider>
               <SessionProvider>
+                <NextSSRPlugin
+                  /**
+                   * The `extractRouterConfig` will extract **only** the route configs
+                   * from the router to prevent additional information from being
+                   * leaked to the client. The data passed to the client is the same
+                   * as if you were to fetch `/api/uploadthing` directly.
+                   */
+                  routerConfig={extractRouterConfig(ourFileRouter)}
+                />
                 {children} <Modals />
               </SessionProvider>
             </QueryProvider>

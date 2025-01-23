@@ -1,6 +1,7 @@
 "use client";
 import React, { useMemo, useRef, useState } from "react";
 import { AnimatePresence, motion } from "motion/react";
+
 import {
   AlertDialog,
   AlertDialogAction,
@@ -25,15 +26,20 @@ import { Button } from "@/components/ui/button";
 import {
   BlocksIcon,
   CalendarIcon,
+  CheckIcon,
+  ImageIcon,
   IndianRupeeIcon,
   MapPinHouse,
   MapPinIcon,
   MapPinnedIcon,
+  MinusIcon,
+  PaperclipIcon,
   PenIcon,
   PlusCircleIcon,
   PlusIcon,
   TerminalIcon,
   Trash2Icon,
+  XIcon,
 } from "lucide-react";
 import { useCreateEventModalStore } from "../store/use-create-event-modal-store";
 import { Progress } from "@/components/ui/progress";
@@ -43,7 +49,6 @@ import { Input } from "@/components/ui/input";
 import { Separator } from "@/components/ui/separator";
 import { DateRange } from "react-day-picker";
 import { addDays } from "date-fns";
-import { Calendar } from "@/components/ui/calendar";
 import usePlacesAutocomplete, {
   ClearSuggestions,
   getGeocode,
@@ -57,6 +62,16 @@ import { VisuallyHidden } from "@radix-ui/react-visually-hidden";
 import { Block } from "@/db/schema";
 import { Textarea } from "@/components/ui/textarea";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { UploadButton } from "@/lib/uploadthing";
+import Image from "next/image";
+import { Calendar } from "@/components/ui/calendar";
 
 declare global {
   interface Window {
@@ -86,12 +101,22 @@ interface CreateEventMapModalProps {
   setPlaceName: React.Dispatch<React.SetStateAction<string | null>>;
 }
 
+type Banner = {
+  url: string;
+  key: string;
+};
+
+type Brochure = {
+  url: string;
+  filename: string;
+};
+
 const CreateEventModal = () => {
   const [mapSelected, setMapSelected] = useState<{
     lat: number;
     lng: number;
   } | null>(null);
-  const [completed, setCompleted] = useState(25);
+  const [completed, setCompleted] = useState(0);
   const [open, setOpen] = useCreateEventModalStore();
   const [calendarOpen, setCalendarOpen] = useState(false);
   const [mapOpen, setMapOpen] = useState(false);
@@ -102,6 +127,17 @@ const CreateEventModal = () => {
   const [blocksList, setBlocksList] = useState<Block[]>([]);
   const [createBlockOpen, setCreateBlockOpen] = useState(false);
   const [editBlockOpen, setEditBlockOpen] = useState(false);
+
+  const [eventType, setEventType] = useState<null | string>(null);
+
+  const [bannerDialog, setBannerDialog] = useState(false);
+  const [bannersList, setBannersList] = useState<Array<Banner>>([]);
+  const [uploadBannerDialog, setUploadBannerDialog] = useState(false);
+
+  const [brochureDialog, setBrochureDialog] = useState(false);
+
+  const [venueTag, setVenueTag] = useState("");
+  const [eventName, setEventName] = useState("");
 
   const {
     ready,
@@ -114,18 +150,25 @@ const CreateEventModal = () => {
     debounce: 300,
   });
 
-  const [date, setDate] = useState<DateRange | undefined>({
-    from: new Date(2022, 0, 20),
-    to: addDays(new Date(2022, 0, 20), 20),
-  });
-
   const [block, setBlock] = useState<Block>({
     title: "",
     paragraph: "",
   });
 
-  console.log(completed);
+  const [brochure, setBrochure] = useState<Brochure | null>(null);
 
+  const [price, setPrice] = useState<string>("0");
+
+  const [date, setDate] = React.useState<DateRange | undefined>({
+    from: new Date(),
+    to: addDays(new Date(), 5),
+  });
+
+  const dateFormatter = new Intl.DateTimeFormat("en-GB", {
+    day: "2-digit",
+    month: "short",
+    year: "numeric",
+  });
   return (
     <>
       <CreateEventMapModal
@@ -318,12 +361,175 @@ const CreateEventModal = () => {
         </DialogContent>
       </Dialog>
 
+      <Dialog open={uploadBannerDialog} onOpenChange={setUploadBannerDialog}>
+        <DialogContent className="w-[250px]">
+          <VisuallyHidden>
+            <DialogHeader>
+              <DialogTitle>Are you absolutely sure?</DialogTitle>
+              <DialogDescription>
+                This action cannot be undone. This will permanently delete your
+                account and remove your data from our servers.
+              </DialogDescription>
+            </DialogHeader>
+          </VisuallyHidden>
+          <div className="flex justify-center items-center flex-col">
+            <UploadButton
+              disabled={bannersList.length >= 5}
+              endpoint="imageUploader"
+              onBeforeUploadBegin={(files) => {
+                if (bannersList.length >= 5) {
+                  // Display an error message and prevent upload by returning an empty array
+                  alert("You can only upload up to 5 banners.");
+                  return [];
+                }
+                return files; // Allow the upload
+              }}
+              onClientUploadComplete={(res) => {
+                // Do something with the response
+                const banners = res.map((banner: Banner) => ({
+                  url: banner.url,
+                  key: banner.key,
+                }));
+                setBannersList((prev) => [...prev, ...banners]);
+                setUploadBannerDialog(false);
+              }}
+              onUploadError={(error: Error) => {
+                // Do something with the error.
+                alert(`ERROR! ${error.message}`);
+              }}
+            />
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      <Dialog open={brochureDialog} onOpenChange={setBrochureDialog}>
+        <DialogContent className="w-[350px]">
+          <VisuallyHidden>
+            <DialogHeader>
+              <DialogTitle>Are you absolutely sure?</DialogTitle>
+              <DialogDescription>
+                This action cannot be undone. This will permanently delete your
+                account and remove your data from our servers.
+              </DialogDescription>
+            </DialogHeader>
+          </VisuallyHidden>
+          <div className="flex justify-center items-center flex-col">
+            <UploadButton
+              disabled={bannersList.length >= 5}
+              endpoint="imageUploader"
+              onBeforeUploadBegin={(files) => {
+                if (bannersList.length > 1) {
+                  // Display an error message and prevent upload by returning an empty array
+                  alert("You can only upload up to 5 banners.");
+                  return [];
+                }
+                return files; // Allow the upload
+              }}
+              onClientUploadComplete={(res) => {
+                const brochure: Brochure = {
+                  url: res[0].url,
+                  filename: res[0].name,
+                };
+                // Do something with the response
+                setBrochure(brochure);
+                setBrochureDialog(false);
+              }}
+              onUploadError={(error: Error) => {
+                // Do something with the error.
+                alert(`ERROR! ${error.message}`);
+              }}
+            />
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      <Dialog open={bannerDialog} onOpenChange={setBannerDialog}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle className="text-xl">Upload Banners</DialogTitle>
+            <DialogDescription>
+              Upload banners to make your event attractive
+            </DialogDescription>
+          </DialogHeader>
+          <div className="w-full flex justify-end items-center">
+            <Button
+              variant={`outline`}
+              size={`sm`}
+              disabled={bannersList.length >= 5}
+              onClick={() => setUploadBannerDialog(true)}
+            >
+              <PlusCircleIcon />
+              <p>Upload</p>
+            </Button>
+          </div>
+          {bannersList.length > 0 ? (
+            <ScrollArea className="flex h-64 px-2 shadow-inner border shadow-neutral-400 py-2 rounded-lg">
+              <div className="flex flex-wrap gap-2 py-2 justify-center items-center">
+                {bannersList.map((banner, index) => (
+                  <AnimatePresence initial={false} key={index}>
+                    <motion.div
+                      key={index}
+                      initial={{
+                        y: 100,
+                      }}
+                      animate={{
+                        y: 0,
+                      }}
+                      exit={{
+                        x: 100,
+                      }}
+                      className="w-fit flex justify-center items-center rounded-lg relative"
+                    >
+                      <Image
+                        src={banner.url}
+                        alt="banner"
+                        width={400}
+                        height={400}
+                        className="aspect-video w-[180px] rounded-lg h-[110px] "
+                      />
+                      <div
+                        onClick={() => {
+                          const updatedBanners = bannersList.filter(
+                            (deletedBanner) => banner.url !== deletedBanner.url
+                          );
+                          setBannersList(updatedBanners);
+                        }}
+                        className="p-0.5 rounded-full absolute cursor-pointer -top-2 border bg-white -right-2"
+                      >
+                        <XIcon className="size-4 z-50" />
+                      </div>
+                    </motion.div>
+                  </AnimatePresence>
+                ))}
+              </div>
+            </ScrollArea>
+          ) : (
+            <div className="h-40 flex justify-center items-center">
+              <p className="text-neutral-600">No banners uploaded</p>
+            </div>
+          )}
+          <DialogFooter>
+            <Button
+              className="shadow-md"
+              onClick={() => setBannerDialog(false)}
+            >
+              Done
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
       {/* Other components and content */}
 
       <Dialog open={calendarOpen} onOpenChange={setCalendarOpen}>
         <DialogContent className="p-0 w-fit">
+          <VisuallyHidden>
+            <DialogHeader>
+              <DialogTitle></DialogTitle>
+              <DialogDescription></DialogDescription>
+            </DialogHeader>
+          </VisuallyHidden>
           <Calendar
-            className=""
             initialFocus
             mode="range"
             defaultMonth={date?.from}
@@ -385,10 +591,10 @@ const CreateEventModal = () => {
             </div>
           </div>
 
-          <div className="border -mt-16 h-34 flex justify-center items-center">
+          <div className="-mt-8 flex justify-center px-3 py-4 shadow-inner h-54 shadow-neutral-400 rounded-lg items-center">
             {completed === 0 && (
               <motion.div
-                className="flex gap-x-4 w-full border h-20 items-center justify-between"
+                className="flex gap-y-6 flex-col w-full items-center justify-between"
                 initial={{
                   y: 100,
                 }}
@@ -399,82 +605,138 @@ const CreateEventModal = () => {
                   x: -100,
                 }}
               >
-                <div className="w-full flex flex-col gap-y-2">
-                  <Label>Event Name</Label>
-                  <div className="relative">
-                    <PenIcon className="absolute left-3 top-2.5 size-4" />
+                <div className="flex w-full gap-x-6">
+                  <div className="w-full flex flex-col gap-y-2">
+                    <div className="flex items-center">
+                      <Label>Event Name</Label>
+                      {eventName ? (
+                        <CheckIcon
+                          strokeWidth={2}
+                          className="size-5 p-1 shadow-sm text-green-600 ml-2 bg-white border rounded-full"
+                        />
+                      ) : (
+                        <MinusIcon
+                          strokeWidth={3}
+                          className="size-5 p-1 shadow-sm text-neural-600 ml-2 bg-white border rounded-full"
+                        />
+                      )}
+                    </div>
+                    <div className="relative">
+                      <PenIcon className="absolute left-3 top-2.5 size-4" />
 
-                    <Separator
-                      orientation="vertical"
-                      className="absolute left-9 bg-black/50 h-4 top-2.5"
-                    />
-                    <Input placeholder={`e.g. Memento, `} className="pl-11" />
+                      <Separator
+                        orientation="vertical"
+                        className="absolute left-9 bg-black/50 h-4 top-2.5"
+                      />
+                      <Input
+                        onChange={(e) => setEventName(e.target.value)}
+                        placeholder={`e.g. Memento, `}
+                        className="pl-11 shadow-sm"
+                        value={eventName}
+                      />
+                    </div>
+                  </div>
+
+                  <div className="w-full flex flex-col gap-y-2">
+                    <div className="flex items-center">
+                      <Label>Date</Label>
+                      {date ? (
+                        <CheckIcon
+                          strokeWidth={3}
+                          className="size-5 p-1 shadow-sm text-green-600 ml-2 bg-white border rounded-full"
+                        />
+                      ) : (
+                        <MinusIcon
+                          strokeWidth={3}
+                          className="size-5 p-1 shadow-sm text-neural-600 ml-2 bg-white border rounded-full"
+                        />
+                      )}
+                    </div>
+                    <Button
+                      variant={`outline`}
+                      className="text-start shadow-sm bg-neutral-200"
+                      onClick={() => setCalendarOpen(true)}
+                    >
+                      <CalendarIcon className="size-4" />
+                      <Separator
+                        orientation="vertical"
+                        className="bg-black/50"
+                      />
+                      <p className="w-full text-start">
+                        {`${
+                          date?.from ? dateFormatter.format(date.from) : ""
+                        } - ${date?.to ? dateFormatter.format(date.to) : ""}`}
+                      </p>
+                    </Button>
                   </div>
                 </div>
+                <div className="flex w-full gap-x-6">
+                  <div className="w-full flex flex-col gap-y-2">
+                    <div className="flex items-center">
+                      <Label>Venue Location</Label>
+                      {mapSelected ? (
+                        <CheckIcon
+                          strokeWidth={3}
+                          className="size-5 p-1 shadow-sm text-green-600 ml-2 bg-white border rounded-full"
+                        />
+                      ) : (
+                        <MinusIcon
+                          strokeWidth={3}
+                          className="size-5 p-1 shadow-sm text-neural-600 ml-2 bg-white border rounded-full"
+                        />
+                      )}
+                    </div>
+                    <Button
+                      variant={`outline`}
+                      className="text-start justify-start shadow-sm bg-neutral-200"
+                      onClick={() => setMapOpen(true)}
+                    >
+                      <MapPinnedIcon className="size-4" />
+                      <Separator
+                        orientation="vertical"
+                        className="bg-black/50"
+                      />
+                      <p className="truncate w-40 text-start">
+                        {mapSelected ? placeName : "Select on map"}
+                      </p>
+                    </Button>
+                  </div>{" "}
+                  <div className="w-full flex flex-col gap-y-2">
+                    <div className="flex items-center">
+                      <Label>Venue Tag</Label>
+                      {venueTag ? (
+                        <CheckIcon
+                          strokeWidth={3}
+                          className="size-5 p-1 shadow-sm text-green-600 ml-2 bg-white border rounded-full"
+                        />
+                      ) : (
+                        <MinusIcon
+                          strokeWidth={3}
+                          className="size-5 p-1 shadow-sm text-neural-600 ml-2 bg-white border rounded-full"
+                        />
+                      )}
+                    </div>
+                    <div className="relative">
+                      <MapPinHouse className="absolute left-3 top-2.5 size-4" />
 
-                <div className="w-full flex flex-col gap-y-2">
-                  <Label>Date time</Label>
-                  <Button
-                    variant={`outline`}
-                    className="text-start"
-                    onClick={() => setCalendarOpen(true)}
-                  >
-                    <CalendarIcon className="size-4" />
-                    <Separator orientation="vertical" className="bg-black/50" />
-                    <p className="w-full text-start">Select Date</p>
-                  </Button>
-                </div>
-              </motion.div>
-            )}{" "}
-            {completed === 25 && (
-              <motion.div
-                className="flex gap-x-4 w-full h-full items-center justify-between"
-                initial={{
-                  x: 50,
-                  opacity: 0,
-                }}
-                animate={{
-                  x: 0,
-                  opacity: 100,
-                }}
-                exit={{
-                  x: -100,
-                }}
-              >
-                <div className="w-full flex flex-col gap-y-2">
-                  <Label>Venue Location</Label>
-                  <Button
-                    variant={`outline`}
-                    className="text-start justify-start"
-                    onClick={() => setMapOpen(true)}
-                  >
-                    <MapPinnedIcon className="size-4" />
-                    <Separator orientation="vertical" className="bg-black/50" />
-                    <p className="truncate w-40 text-start">
-                      {mapSelected ? placeName : "Select on map"}
-                    </p>
-                  </Button>
-                </div>{" "}
-                <div className="w-full flex flex-col gap-y-2">
-                  <Label>Venue tag</Label>
-                  <div className="relative">
-                    <MapPinHouse className="absolute left-3 top-2.5 size-4" />
-
-                    <Separator
-                      orientation="vertical"
-                      className="absolute left-9 bg-black/50 h-4 top-2.5"
-                    />
-                    <Input
-                      placeholder={`e.g. 1st floor, Nishat building`}
-                      className="pl-11"
-                    />
+                      <Separator
+                        orientation="vertical"
+                        className="absolute left-9 bg-black/50 h-4 top-2.5"
+                      />
+                      <Input
+                        onChange={(e) => setVenueTag(e.target.value)}
+                        placeholder={`e.g. 1st floor, Nishat building`}
+                        className="pl-11 shadow-sm"
+                        value={venueTag}
+                      />
+                    </div>
                   </div>
                 </div>
               </motion.div>
             )}{" "}
             {completed === 50 && (
               <motion.div
-                className="flex gap-x-4 w-full py-2 border items-center justify-between"
+                className="flex gap-x-4 flex-col gap-y-6 w-full py-2  items-center justify-between"
                 initial={{
                   x: 50,
                   opacity: 0,
@@ -488,35 +750,193 @@ const CreateEventModal = () => {
                 }}
               >
                 {" "}
-                <div className="w-full flex flex-col gap-y-2">
-                  <Label>Ticket Pricing</Label>
-                  <div className="relative">
-                    <IndianRupeeIcon className="absolute left-3 top-2.5 size-4" />
+                <div className="flex w-full gap-x-6">
+                  <div className="w-full flex flex-col gap-y-2">
+                    <div className="flex items-center">
+                      <Label>Ticket Price</Label>
+                      {price ? (
+                        <CheckIcon
+                          strokeWidth={3}
+                          className="size-5 p-1 shadow-sm text-green-600 ml-2 bg-white border rounded-full"
+                        />
+                      ) : (
+                        <MinusIcon
+                          strokeWidth={3}
+                          className="size-5 p-1 shadow-sm text-neural-600 ml-2 bg-white border rounded-full"
+                        />
+                      )}
+                    </div>
+                    <div className="relative">
+                      <IndianRupeeIcon className="absolute left-3 top-2.5 size-4" />
 
-                    <Separator
-                      orientation="vertical"
-                      className="absolute left-9 bg-black/50 h-4 top-2.5"
-                    />
-                    <Input
-                      placeholder={`e.g. 200, 250, `}
-                      type="number"
-                      className="pl-11"
-                    />
+                      <Separator
+                        orientation="vertical"
+                        className="absolute left-9 bg-black/50 h-4 top-2.5"
+                      />
+                      <Input
+                        onChange={(e) => setPrice(e.target.value)}
+                        placeholder={`e.g. 200, 250, `}
+                        type="number"
+                        value={price}
+                        className="pl-11"
+                      />
+                    </div>
+                  </div>
+                  <div className="w-full flex flex-col gap-y-2">
+                    <div className="flex items-center">
+                      <Label>Blocks</Label>
+                      {blocksList.length > 0 ? (
+                        <CheckIcon
+                          strokeWidth={3}
+                          className="size-5 p-1 shadow-sm text-green-600 ml-2 bg-white border rounded-full"
+                        />
+                      ) : (
+                        <MinusIcon
+                          strokeWidth={3}
+                          className="size-5 p-1 shadow-sm text-neural-600 ml-2 bg-white border rounded-full"
+                        />
+                      )}
+                    </div>
+                    <Button
+                      variant={`outline`}
+                      className="text-start justify-start bg-neutral-200"
+                      onClick={() => setBlocksContainer(true)}
+                    >
+                      <BlocksIcon className="size-4" />
+                      <Separator
+                        orientation="vertical"
+                        className="bg-black/50"
+                      />
+                      <p className="truncate w-40 text-start">
+                        {blocksList.length > 0
+                          ? "Manage blocks"
+                          : "Create blocks"}
+                      </p>
+                    </Button>
+                  </div>
+                </div>{" "}
+                <div className="flex gap-x-6 w-full">
+                  <div className="w-full flex flex-col gap-y-2">
+                    <div className="flex items-center">
+                      <Label>Event Type</Label>
+                      {eventType ? (
+                        <CheckIcon
+                          strokeWidth={3}
+                          className="size-5 p-1 shadow-sm text-green-600 ml-2 bg-white border rounded-full"
+                        />
+                      ) : (
+                        <MinusIcon
+                          strokeWidth={3}
+                          className="size-5 p-1 shadow-sm text-neural-600 ml-2 bg-white border rounded-full"
+                        />
+                      )}
+                    </div>
+                    <Select
+                      required
+                      onValueChange={(value) => setEventType(value)}
+                    >
+                      <SelectTrigger className="w-full focus-visible:ring-2 focus:ring-2 bg-neutral-200 font-medium">
+                        <SelectValue placeholder="Select event type" />
+                      </SelectTrigger>
+                      <SelectContent className="font-medium">
+                        <SelectItem value="public" className="flex">
+                          Public <span className="font-normal">(everyone)</span>
+                        </SelectItem>
+                        <SelectItem value="private">
+                          Private {value}
+                          <span className="font-normal w-[100px] truncate">
+                            (close members only)
+                          </span>
+                        </SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>{" "}
+                  <div className="w-full flex flex-col gap-y-2">
+                    <div className="flex items-center">
+                      <Label>Banners</Label>
+                      {bannersList.length > 0 ? (
+                        <CheckIcon
+                          strokeWidth={3}
+                          className="size-5 p-1 shadow-sm text-green-600 ml-2 bg-white border rounded-full"
+                        />
+                      ) : (
+                        <MinusIcon
+                          strokeWidth={3}
+                          className="size-5 p-1 shadow-sm text-neural-600 ml-2 bg-white border rounded-full"
+                        />
+                      )}
+                    </div>
+                    <Button
+                      variant={`outline`}
+                      className="text-start justify-start bg-neutral-200"
+                      onClick={() => setBannerDialog(true)}
+                    >
+                      <ImageIcon className="size-4" />
+                      <Separator
+                        orientation="vertical"
+                        className="bg-black/50"
+                      />
+                      <p className="truncate w-40 text-start">
+                        {bannersList.length > 0
+                          ? "Manage banners"
+                          : "Upload banners"}
+                      </p>
+                    </Button>
                   </div>
                 </div>
-                <div className="w-full flex flex-col gap-y-2">
-                  <Label>Details Blocks</Label>
-                  <Button
-                    variant={`outline`}
-                    className="text-start justify-start"
-                    onClick={() => setBlocksContainer(true)}
-                  >
-                    <BlocksIcon className="size-4" />
-                    <Separator orientation="vertical" className="bg-black/50" />
-                    <p className="truncate w-40 text-start">
-                      {mapSelected ? placeName : "Select on map"}
-                    </p>
-                  </Button>
+              </motion.div>
+            )}
+            {completed === 100 && (
+              <motion.div
+                className="flex gap-x-4 flex-col gap-y-6 w-full py-2  items-center justify-between"
+                initial={{
+                  x: 50,
+                  opacity: 0,
+                }}
+                animate={{
+                  x: 0,
+                  opacity: 100,
+                }}
+                exit={{
+                  x: -100,
+                }}
+              >
+                {" "}
+                <div className="flex w-full  justify-center items-center gap-x-6">
+                  <div className="w-1/2 flex flex-col gap-y-2">
+                    <div className="flex items-center">
+                      <Label>Brochure</Label>
+                      {brochure ? (
+                        <CheckIcon
+                          strokeWidth={3}
+                          className="size-5 p-1 shadow-sm text-green-600 ml-2 bg-white border rounded-full"
+                        />
+                      ) : (
+                        <MinusIcon
+                          strokeWidth={3}
+                          className="size-5 p-1 shadow-sm text-neural-600 ml-2 bg-white border rounded-full"
+                        />
+                      )}
+                    </div>
+                    <Button
+                      variant={`outline`}
+                      className="text-start justify-start bg-neutral-200"
+                      onClick={() => setBrochureDialog(true)}
+                    >
+                      <PaperclipIcon className="size-4" />
+                      <Separator
+                        orientation="vertical"
+                        className="bg-black/50"
+                      />
+                      <p className="truncate w-40 text-start">
+                        {brochure ? (
+                          <span>{brochure.filename}</span>
+                        ) : (
+                          <span>Upload brochure</span>
+                        )}
+                      </p>
+                    </Button>
+                  </div>
                 </div>{" "}
               </motion.div>
             )}
@@ -524,7 +944,7 @@ const CreateEventModal = () => {
 
           <div className="w-full flex justify-center items-center -mt-4">
             {completed !== 100 && (
-              <div className="flex border gap-x-3">
+              <div className="flex  gap-x-3">
                 {completed !== 0 && (
                   <motion.div
                     initial={{
@@ -539,7 +959,7 @@ const CreateEventModal = () => {
                     <Button
                       variant={`outline`}
                       className="text-sm hover:scale-105 font-semibold w-[100px] transition-all duration-300 transform"
-                      onClick={() => setCompleted(completed - 25)}
+                      onClick={() => setCompleted(completed - 50)}
                     >
                       Previous
                     </Button>
@@ -557,7 +977,7 @@ const CreateEventModal = () => {
                 >
                   <Button
                     className="text-sm hover:scale-105 font-semibold w-[100px] transition-all duration-300  transform"
-                    onClick={() => setCompleted(completed + 25)}
+                    onClick={() => setCompleted(completed + 50)}
                   >
                     Next
                   </Button>
@@ -565,7 +985,7 @@ const CreateEventModal = () => {
               </div>
             )}
             {completed === 100 && (
-              <div className="flex border gap-x-3">
+              <div className="flex gap-x-3">
                 <motion.div
                   initial={{
                     scale: 0,
@@ -579,7 +999,7 @@ const CreateEventModal = () => {
                   <Button
                     variant={`outline`}
                     className="text-sm hover:scale-105 font-semibold w-[100px]"
-                    onClick={() => setCompleted(completed - 25)}
+                    onClick={() => setCompleted(completed - 50)}
                   >
                     Previous
                   </Button>
