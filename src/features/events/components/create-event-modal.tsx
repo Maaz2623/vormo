@@ -112,6 +112,7 @@ type Brochure = {
 };
 
 const CreateEventModal = () => {
+  
   const [mapSelected, setMapSelected] = useState<{
     lat: number;
     lng: number;
@@ -139,6 +140,15 @@ const CreateEventModal = () => {
   const [venueTag, setVenueTag] = useState("");
   const [eventName, setEventName] = useState("");
 
+  const [brochure, setBrochure] = useState<Brochure | null>(null);
+
+  const [price, setPrice] = useState<string>("0");
+
+  const [date, setDate] = React.useState<DateRange | undefined>({
+    from: new Date(),
+    to: addDays(new Date(), 5),
+  });
+
   const {
     ready,
     value,
@@ -155,14 +165,6 @@ const CreateEventModal = () => {
     paragraph: "",
   });
 
-  const [brochure, setBrochure] = useState<Brochure | null>(null);
-
-  const [price, setPrice] = useState<string>("0");
-
-  const [date, setDate] = React.useState<DateRange | undefined>({
-    from: new Date(),
-    to: addDays(new Date(), 5),
-  });
 
   const dateFormatter = new Intl.DateTimeFormat("en-GB", {
     day: "2-digit",
@@ -463,7 +465,7 @@ const CreateEventModal = () => {
             </Button>
           </div>
           {bannersList.length > 0 ? (
-            <ScrollArea className="flex h-64 px-2 shadow-inner border shadow-neutral-400 py-2 rounded-lg">
+            <ScrollArea className="flex px-2 shadow-inner border shadow-neutral-400 py-2 rounded-lg">
               <div className="flex flex-wrap gap-2 py-2 justify-center items-center">
                 {bannersList.map((banner, index) => (
                   <AnimatePresence initial={false} key={index}>
@@ -545,7 +547,7 @@ const CreateEventModal = () => {
       </Button>
 
       <AlertDialog open={open} onOpenChange={setOpen}>
-        <AlertDialogContent className="w-[550px] h-[500px] max-w-[1000px]">
+        <AlertDialogContent className="md:w-[550px] gap-y-4 w-[90vw] rounded-lg max-w-[1000px]">
           <AlertDialogHeader className="w-full flex justify-center items-center">
             <AlertDialogTitle className="text-2xl font-semibold">
               Create Event
@@ -591,7 +593,7 @@ const CreateEventModal = () => {
             </div>
           </div>
 
-          <div className="-mt-8 flex justify-center px-3 py-4 shadow-inner h-54 shadow-neutral-400 rounded-lg items-center">
+          <div className="mt-4 mb-4 flex justify-center w-full px-3 py-4 shadow-inner md:h-56 shadow-neutral-400 rounded-lg items-center">
             {completed === 0 && (
               <motion.div
                 className="flex gap-y-6 flex-col w-full items-center justify-between"
@@ -605,7 +607,7 @@ const CreateEventModal = () => {
                   x: -100,
                 }}
               >
-                <div className="flex w-full gap-x-6">
+                <div className="flex w-full gap-x-6 flex-col sm:flex-row gap-y-4">
                   <div className="w-full flex flex-col gap-y-2">
                     <div className="flex items-center">
                       <Label>Event Name</Label>
@@ -670,7 +672,7 @@ const CreateEventModal = () => {
                     </Button>
                   </div>
                 </div>
-                <div className="flex w-full gap-x-6">
+                <div className="flex w-full gap-x-6 flex-col sm:flex-row gap-y-4">
                   <div className="w-full flex flex-col gap-y-2">
                     <div className="flex items-center">
                       <Label>Venue Location</Label>
@@ -949,11 +951,9 @@ const CreateEventModal = () => {
                   <motion.div
                     initial={{
                       scale: 0,
-                      y: 50,
                     }}
                     animate={{
                       scale: 1,
-                      y: 0,
                     }}
                   >
                     <Button
@@ -968,11 +968,9 @@ const CreateEventModal = () => {
                 <motion.div
                   initial={{
                     scale: 0,
-                    y: 50,
                   }}
                   animate={{
                     scale: 1,
-                    y: 0,
                   }}
                 >
                   <Button
@@ -988,12 +986,10 @@ const CreateEventModal = () => {
               <div className="flex gap-x-3">
                 <motion.div
                   initial={{
-                    scale: 0,
-                    y: 50,
+                    scale: 0.8,
                   }}
                   animate={{
                     scale: 1,
-                    y: 0,
                   }}
                 >
                   <Button
@@ -1007,11 +1003,9 @@ const CreateEventModal = () => {
                 <motion.div
                   initial={{
                     scale: 0,
-                    y: 50,
                   }}
                   animate={{
                     scale: 1,
-                    y: 0,
                   }}
                 >
                   <Button className="text-sm hover:scale-105 font-semibold w-[100px]">
