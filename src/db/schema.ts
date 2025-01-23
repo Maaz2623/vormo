@@ -1,8 +1,4 @@
 import {
-  Banner,
-  Brochure,
-} from "@/features/events/components/create-event-modal";
-import {
   decimal,
   jsonb,
   pgEnum,
@@ -58,25 +54,29 @@ export type Block = {
   paragraph: string;
 };
 
+export type Location = {
+  lat: number;
+  lng: number;
+};
+
 export const eventTypeEnum = pgEnum("event_type", ["public", "private"]);
 
 export const events = pgTable("events", {
   id: uuid("id").notNull().primaryKey().defaultRandom().unique(),
-  name: varchar({
-    length: 50,
-  }).notNull(), // Event name
+  name: varchar({ length: 50 }).notNull(), // Event name
   organizationId: uuid("organization_id")
     .notNull()
     .references(() => organizations.id), // Reference to organizations table
-  price: decimal("price").notNull(), // Event price
-  venueLocation: text("venue_location").notNull(), // Venue location (as text/JSON)
-  venueTag: text("venue_tag").notNull(), // Venue tag
-  blocks: jsonb("blocks").$type<Block[]>().default([]), // Blocks list as JSON
-  banners: jsonb("banners").$type<Banner[]>().default([]), // Banners list as JSON
-  brochure: jsonb("brochure").$type<Brochure | null>().default(null), // Brochure (nullable JSON)
+  price: decimal("event_ticket_price").notNull(), // Event price
+  venueLocation: jsonb("event_venue_location").$type<Location>().notNull(), // Venue location (as JSON)
+  venueTag: text("event_venue_tag").notNull(), // Venue tag
+  blocks: jsonb("event_blocks").$type<Block[]>().default([]), // Blocks as JSON
+  banners: jsonb("event_banners").$type<string[]>().default([]), // Banners as JSON
+  brochure: text("event_brochure"), // Brochure (nullable text)
   eventType: eventTypeEnum("event_type").default("public"), // Event type (enum)
-  date: timestamp("date").notNull(), // Event date
+  dateFrom: timestamp("date_from").notNull(), // Start date
+  dateTo: timestamp("date_to").notNull(), // End date
 });
-
 export type Organization = typeof organizations.$inferSelect;
 export type Member = typeof memberships.$inferSelect;
+export type Event = typeof events.$inferSelect;

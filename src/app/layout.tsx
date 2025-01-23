@@ -9,6 +9,7 @@ import { Modals } from "@/components/modals";
 import { NextSSRPlugin } from "@uploadthing/react/next-ssr-plugin";
 import Script from "next/script";
 import { extractRouterConfig } from "uploadthing/server";
+import { Toaster } from "@/components/ui/toaster";
 import { ourFileRouter } from "./api/uploadthing/core";
 
 const geistSans = Geist({
@@ -55,7 +56,8 @@ export default function RootLayout({
                    */
                   routerConfig={extractRouterConfig(ourFileRouter)}
                 />
-                {children} <Modals />
+                {children}
+                <Toaster /> <Modals />
               </SessionProvider>
             </QueryProvider>
           </JotaiProvider>

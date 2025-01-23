@@ -1,11 +1,18 @@
 CREATE TYPE "public"."roles" AS ENUM('ADMIN', 'MODERATOR', 'USER');--> statement-breakpoint
+CREATE TYPE "public"."event_type" AS ENUM('public', 'private');--> statement-breakpoint
 CREATE TABLE "events" (
 	"id" uuid PRIMARY KEY DEFAULT gen_random_uuid() NOT NULL,
+	"name" varchar(50) NOT NULL,
 	"organization_id" uuid NOT NULL,
-	"price" numeric NOT NULL,
-	"venue_location" text NOT NULL,
-	"venue_tag" text NOT NULL,
-	"blocks" jsonb DEFAULT '[]'::jsonb,
+	"event_ticket_price" numeric NOT NULL,
+	"event_venue_location" jsonb NOT NULL,
+	"event_venue_tag" text NOT NULL,
+	"event_blocks" jsonb DEFAULT '[]'::jsonb,
+	"event_banners" jsonb DEFAULT '[]'::jsonb,
+	"event_brochure" text,
+	"event_type" "event_type" DEFAULT 'public',
+	"date_from" timestamp NOT NULL,
+	"date_to" timestamp NOT NULL,
 	CONSTRAINT "events_id_unique" UNIQUE("id")
 );
 --> statement-breakpoint

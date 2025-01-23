@@ -1,5 +1,5 @@
 {
-  "id": "3a36c077-6765-4058-807a-fc34a8bd4748",
+  "id": "18c23f2d-6e1f-4792-b85e-c88acd632f9a",
   "prevId": "00000000-0000-0000-0000-000000000000",
   "version": "7",
   "dialect": "postgresql",
@@ -15,36 +15,75 @@
           "notNull": true,
           "default": "gen_random_uuid()"
         },
+        "name": {
+          "name": "name",
+          "type": "varchar(50)",
+          "primaryKey": false,
+          "notNull": true
+        },
         "organization_id": {
           "name": "organization_id",
           "type": "uuid",
           "primaryKey": false,
           "notNull": true
         },
-        "price": {
-          "name": "price",
+        "event_ticket_price": {
+          "name": "event_ticket_price",
           "type": "numeric",
           "primaryKey": false,
           "notNull": true
         },
-        "venue_location": {
-          "name": "venue_location",
+        "event_venue_location": {
+          "name": "event_venue_location",
+          "type": "jsonb",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "event_venue_tag": {
+          "name": "event_venue_tag",
           "type": "text",
           "primaryKey": false,
           "notNull": true
         },
-        "venue_tag": {
-          "name": "venue_tag",
-          "type": "text",
-          "primaryKey": false,
-          "notNull": true
-        },
-        "blocks": {
-          "name": "blocks",
+        "event_blocks": {
+          "name": "event_blocks",
           "type": "jsonb",
           "primaryKey": false,
           "notNull": false,
           "default": "'[]'::jsonb"
+        },
+        "event_banners": {
+          "name": "event_banners",
+          "type": "jsonb",
+          "primaryKey": false,
+          "notNull": false,
+          "default": "'[]'::jsonb"
+        },
+        "event_brochure": {
+          "name": "event_brochure",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "event_type": {
+          "name": "event_type",
+          "type": "event_type",
+          "typeSchema": "public",
+          "primaryKey": false,
+          "notNull": false,
+          "default": "'public'"
+        },
+        "date_from": {
+          "name": "date_from",
+          "type": "timestamp",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "date_to": {
+          "name": "date_to",
+          "type": "timestamp",
+          "primaryKey": false,
+          "notNull": true
         }
       },
       "indexes": {},
@@ -300,6 +339,14 @@
         "ADMIN",
         "MODERATOR",
         "USER"
+      ]
+    },
+    "public.event_type": {
+      "name": "event_type",
+      "schema": "public",
+      "values": [
+        "public",
+        "private"
       ]
     }
   },

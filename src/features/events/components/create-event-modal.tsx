@@ -47,7 +47,6 @@ import { cn } from "@/lib/utils";
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
 import { Separator } from "@/components/ui/separator";
-import { DateRange } from "react-day-picker";
 import { addDays } from "date-fns";
 import usePlacesAutocomplete, {
   ClearSuggestions,
@@ -72,6 +71,10 @@ import {
 import { UploadButton } from "@/lib/uploadthing";
 import Image from "next/image";
 import { Calendar } from "@/components/ui/calendar";
+import { useCreateEvent } from "../api/use-create-event";
+import { useParams } from "next/navigation";
+import { DateRange } from "react-day-picker";
+import { useRouter } from "next/router";
 
 declare global {
   interface Window {
@@ -112,6 +115,8 @@ export type Brochure = {
 };
 
 const CreateEventModal = () => {
+  const params = useParams();
+  const router = useRouter();
   const [mapSelected, setMapSelected] = useState<{
     lat: number;
     lng: number;
@@ -128,7 +133,7 @@ const CreateEventModal = () => {
   const [brochure, setBrochure] = useState<Brochure | null>(null);
   const [price, setPrice] = useState<string>("0");
   const [bannersList, setBannersList] = useState<Array<Banner>>([]);
-  const [date, setDate] = React.useState<DateRange | undefined>({
+  const [date, setDate] = React.useState<DateRange>({
     from: new Date(),
     to: addDays(new Date(), 5),
   });
@@ -163,6 +168,45 @@ const CreateEventModal = () => {
     month: "short",
     year: "numeric",
   });
+
+  const { mutate } = useCreateEvent();
+
+  const slug = params.organizationSlug;
+
+  const handleSubmit = async () => {
+    if (
+      !mapSelected ||
+      !eventType ||
+      !brochure ||
+      !slug ||
+      !date.from ||
+      !date.to
+    )
+      return;
+    const bannersListUrls = bannersList.map((banner) => banner.url);
+    mutate(
+      {
+        eventName: eventName,
+        eventType: eventType,
+        venueTag: venueTag,
+        organizationSlug: slug as string,
+        price: price,
+        dateFrom: date.from.toISOString() as string, // Convert to ISO string
+        dateTo: date.to.toISOString() as string, // Convert to ISO string
+        mapSelected: mapSelected,
+        brochure: brochure.url,
+        blocksList: blocksList,
+        bannersList: bannersListUrls,
+      },
+      {
+        onSuccess: ({data}) => {
+          router.push(
+            `/organization/${slug}/events/${data.}`
+          );
+        },
+      }
+    );
+  };
 
   return (
     <>
@@ -1003,7 +1047,10 @@ const CreateEventModal = () => {
                     scale: 1,
                   }}
                 >
-                  <Button className="text-sm hover:scale-105 font-semibold w-[100px]">
+                  <Button
+                    className="text-sm hover:scale-105 font-semibold w-[100px]"
+                    onClick={handleSubmit}
+                  >
                     Finish
                   </Button>
                 </motion.div>
