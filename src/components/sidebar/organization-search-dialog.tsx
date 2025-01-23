@@ -23,13 +23,12 @@ import { useParams } from "next/navigation";
 const OrganizationSearchDialog = ({
   searchDialog,
   setSearchDialog,
-  email,
 }: {
   searchDialog: boolean;
   setSearchDialog: (open: boolean) => void;
   email: string;
 }) => {
-  const { data: organizations } = useGetOrganizations(email);
+  const { data: organizations } = useGetOrganizations();
 
   const params = useParams();
 

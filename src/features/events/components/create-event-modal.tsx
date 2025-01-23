@@ -74,7 +74,8 @@ import { Calendar } from "@/components/ui/calendar";
 import { useCreateEvent } from "../api/use-create-event";
 import { useParams } from "next/navigation";
 import { DateRange } from "react-day-picker";
-import { useRouter } from "next/router";
+import { useRouter } from "next/navigation";
+import { toast } from "sonner";
 
 declare global {
   interface Window {
@@ -115,8 +116,8 @@ export type Brochure = {
 };
 
 const CreateEventModal = () => {
-  const params = useParams();
   const router = useRouter();
+  const params = useParams();
   const [mapSelected, setMapSelected] = useState<{
     lat: number;
     lng: number;
@@ -133,7 +134,7 @@ const CreateEventModal = () => {
   const [brochure, setBrochure] = useState<Brochure | null>(null);
   const [price, setPrice] = useState<string>("0");
   const [bannersList, setBannersList] = useState<Array<Banner>>([]);
-  const [date, setDate] = React.useState<DateRange>({
+  const [date, setDate] = React.useState<DateRange | undefined>({
     from: new Date(),
     to: addDays(new Date(), 5),
   });
@@ -179,33 +180,50 @@ const CreateEventModal = () => {
       !eventType ||
       !brochure ||
       !slug ||
+      !date ||
       !date.from ||
       !date.to
     )
       return;
     const bannersListUrls = bannersList.map((banner) => banner.url);
-    mutate(
-      {
-        eventName: eventName,
-        eventType: eventType,
-        venueTag: venueTag,
-        organizationSlug: slug as string,
-        price: price,
-        dateFrom: date.from.toISOString() as string, // Convert to ISO string
-        dateTo: date.to.toISOString() as string, // Convert to ISO string
-        mapSelected: mapSelected,
-        brochure: brochure.url,
-        blocksList: blocksList,
-        bannersList: bannersListUrls,
-      },
-      {
-        onSuccess: ({data}) => {
-          router.push(
-            `/organization/${slug}/events/${data.}`
-          );
+    try {
+      mutate(
+        {
+          eventName: eventName,
+          eventType: eventType,
+          venueTag: venueTag,
+          organizationSlug: slug as string,
+          price: price,
+          dateFrom: date.from.toISOString() as string, // Convert to ISO string
+          dateTo: date.to.toISOString() as string, // Convert to ISO string
+          mapSelected: mapSelected,
+          brochure: brochure.url,
+          blocksList: blocksList,
+          bannersList: bannersListUrls,
         },
-      }
-    );
+        {
+          onSuccess: (data) => {
+            router.push(`/organization/${slug}/events/${data}`);
+            setOpen(false);
+            setEventName("");
+            setVenueTag("");
+            setPrice("");
+            setDate({
+              from: new Date(),
+              to: addDays(new Date(), 5),
+            });
+            setCompleted(0);
+            setMapSelected(null);
+            setBrochure(null);
+            setBlocksList([]);
+            setBannersList([]);
+          },
+        }
+      );
+      toast.success("Event created. Redirecting...");
+    } catch {
+      toast.error("Something went wrong");
+    }
   };
 
   return (
