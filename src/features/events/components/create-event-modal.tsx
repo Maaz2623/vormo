@@ -101,53 +101,46 @@ interface CreateEventMapModalProps {
   setPlaceName: React.Dispatch<React.SetStateAction<string | null>>;
 }
 
-type Banner = {
+export type Banner = {
   url: string;
   key: string;
 };
 
-type Brochure = {
+export type Brochure = {
   url: string;
   filename: string;
 };
 
 const CreateEventModal = () => {
-  
   const [mapSelected, setMapSelected] = useState<{
     lat: number;
     lng: number;
   } | null>(null);
+  const [blocksList, setBlocksList] = useState<Block[]>([]);
+  const [eventType, setEventType] = useState<"public" | "private" | null>(null);
+
   const [completed, setCompleted] = useState(0);
   const [open, setOpen] = useCreateEventModalStore();
   const [calendarOpen, setCalendarOpen] = useState(false);
   const [mapOpen, setMapOpen] = useState(false);
-
-  const [placeName, setPlaceName] = useState<string | null>(null);
-
-  const [blocksContainer, setBlocksContainer] = useState(false);
-  const [blocksList, setBlocksList] = useState<Block[]>([]);
-  const [createBlockOpen, setCreateBlockOpen] = useState(false);
-  const [editBlockOpen, setEditBlockOpen] = useState(false);
-
-  const [eventType, setEventType] = useState<null | string>(null);
-
-  const [bannerDialog, setBannerDialog] = useState(false);
-  const [bannersList, setBannersList] = useState<Array<Banner>>([]);
-  const [uploadBannerDialog, setUploadBannerDialog] = useState(false);
-
-  const [brochureDialog, setBrochureDialog] = useState(false);
-
   const [venueTag, setVenueTag] = useState("");
   const [eventName, setEventName] = useState("");
-
   const [brochure, setBrochure] = useState<Brochure | null>(null);
-
   const [price, setPrice] = useState<string>("0");
-
+  const [bannersList, setBannersList] = useState<Array<Banner>>([]);
   const [date, setDate] = React.useState<DateRange | undefined>({
     from: new Date(),
     to: addDays(new Date(), 5),
   });
+
+  const [placeName, setPlaceName] = useState<string | null>(null);
+
+  const [blocksContainer, setBlocksContainer] = useState(false);
+  const [createBlockOpen, setCreateBlockOpen] = useState(false);
+  const [editBlockOpen, setEditBlockOpen] = useState(false);
+  const [bannerDialog, setBannerDialog] = useState(false);
+  const [uploadBannerDialog, setUploadBannerDialog] = useState(false);
+  const [brochureDialog, setBrochureDialog] = useState(false);
 
   const {
     ready,
@@ -165,12 +158,12 @@ const CreateEventModal = () => {
     paragraph: "",
   });
 
-
   const dateFormatter = new Intl.DateTimeFormat("en-GB", {
     day: "2-digit",
     month: "short",
     year: "numeric",
   });
+
   return (
     <>
       <CreateEventMapModal
@@ -740,7 +733,7 @@ const CreateEventModal = () => {
               <motion.div
                 className="flex gap-x-4 flex-col gap-y-6 w-full py-2  items-center justify-between"
                 initial={{
-                  x: 50,
+                  x: 20,
                   opacity: 0,
                 }}
                 animate={{
@@ -835,7 +828,9 @@ const CreateEventModal = () => {
                     </div>
                     <Select
                       required
-                      onValueChange={(value) => setEventType(value)}
+                      onValueChange={(value) =>
+                        setEventType(value as "public" | "private")
+                      }
                     >
                       <SelectTrigger className="w-full focus-visible:ring-2 focus:ring-2 bg-neutral-200 font-medium">
                         <SelectValue placeholder="Select event type" />
@@ -845,7 +840,7 @@ const CreateEventModal = () => {
                           Public <span className="font-normal">(everyone)</span>
                         </SelectItem>
                         <SelectItem value="private">
-                          Private {value}
+                          Private{" "}
                           <span className="font-normal w-[100px] truncate">
                             (close members only)
                           </span>

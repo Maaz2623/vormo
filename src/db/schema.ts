@@ -1,4 +1,8 @@
 import {
+  Banner,
+  Brochure,
+} from "@/features/events/components/create-event-modal";
+import {
   decimal,
   jsonb,
   pgEnum,
@@ -54,19 +58,24 @@ export type Block = {
   paragraph: string;
 };
 
+export const eventTypeEnum = pgEnum("event_type", ["public", "private"]);
+
 export const events = pgTable("events", {
   id: uuid("id").notNull().primaryKey().defaultRandom().unique(),
   name: varchar({
     length: 50,
-  }).notNull(),
+  }).notNull(), // Event name
   organizationId: uuid("organization_id")
     .notNull()
-    .references(() => organizations.id),
-  price: decimal("price").notNull(),
-  venueLocation: text("venue_location").notNull(),
-  venueTag: text("venue_tag").notNull(),
-  blocks: jsonb("blocks").$type<Block[]>().default([]),
-  date: timestamp("date").notNull(),
+    .references(() => organizations.id), // Reference to organizations table
+  price: decimal("price").notNull(), // Event price
+  venueLocation: text("venue_location").notNull(), // Venue location (as text/JSON)
+  venueTag: text("venue_tag").notNull(), // Venue tag
+  blocks: jsonb("blocks").$type<Block[]>().default([]), // Blocks list as JSON
+  banners: jsonb("banners").$type<Banner[]>().default([]), // Banners list as JSON
+  brochure: jsonb("brochure").$type<Brochure | null>().default(null), // Brochure (nullable JSON)
+  eventType: eventTypeEnum("event_type").default("public"), // Event type (enum)
+  date: timestamp("date").notNull(), // Event date
 });
 
 export type Organization = typeof organizations.$inferSelect;
