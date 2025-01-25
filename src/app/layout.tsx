@@ -6,6 +6,7 @@ import { SessionProvider } from "next-auth/react";
 import { QueryProvider } from "@/components/query-client";
 import { JotaiProvider } from "@/components/jotai-provider";
 import { Modals } from "@/components/modals";
+import "react-responsive-carousel/lib/styles/carousel.min.css";
 import { NextSSRPlugin } from "@uploadthing/react/next-ssr-plugin";
 import Script from "next/script";
 import { extractRouterConfig } from "uploadthing/server";
@@ -57,7 +58,8 @@ export default function RootLayout({
                   routerConfig={extractRouterConfig(ourFileRouter)}
                 />
                 {children}
-                <Toaster /> <Modals />
+                <Toaster />
+                <Modals />
               </SessionProvider>
             </QueryProvider>
           </JotaiProvider>

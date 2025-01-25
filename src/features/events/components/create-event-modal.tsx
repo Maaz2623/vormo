@@ -472,16 +472,7 @@ const CreateEventModal = () => {
           </VisuallyHidden>
           <div className="flex justify-center items-center flex-col">
             <UploadButton
-              disabled={bannersList.length >= 5}
               endpoint="imageUploader"
-              onBeforeUploadBegin={(files) => {
-                if (bannersList.length > 1) {
-                  // Display an error message and prevent upload by returning an empty array
-                  alert("You can only upload up to 5 banners.");
-                  return [];
-                }
-                return files; // Allow the upload
-              }}
               onClientUploadComplete={(res) => {
                 const brochure: Brochure = {
                   url: res[0].url,

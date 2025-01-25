@@ -1,7 +1,7 @@
 import React from "react";
 import PagesHeader from "../_components/pages-header";
 import CreateEventModal from "@/features/events/components/create-event-modal";
-import { ScrollArea } from "@/components/ui/scroll-area";
+import EventsContainer from "./_components/events-container";
 
 const EventsPage = () => {
   return (
@@ -14,9 +14,7 @@ const EventsPage = () => {
           <CreateEventModal />
         </div>
       </PagesHeader>
-      <ScrollArea className="flex-grow w-full bg-white rounded-lg">
-        
-      </ScrollArea>
+      <EventsContainer />
     </div>
   );
 };
